@@ -1,6 +1,7 @@
 # promisified-resource-loader
 
 TODO list:
+- [ ] replace custom promise timeout with https://github.com/building5/promise-timeout#readme
 - [ ] replace `name` with `identifier` as we accent not only strings but arbitrary objects too
 - [ ] error resolving strategies 
   - [ ] by default all errors are going to redirect to target promise error case(including timeout) `(err) => {if(err.isTimeOutError){}}`
@@ -19,7 +20,8 @@ TODO list:
         - [ ] retry with another name
         - [ ] use static existing value (most popular case - existing "show error" resource)
     - [ ] reject with custom error
-  - [ ] use string `name` together with `{ id: "someId", someDataLikeHostOEtc: "localhost", lang: "RU"}` as a key 
+  - [ ] use string `name` together with `{ id: "someId", someDataLikeHostOEtc: "localhost", lang: "RU"}` as a key
+- [ ] node support   
 - [ ] documentation
 - [ ] npm publish
      
