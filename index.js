@@ -20,7 +20,7 @@
 
   var Bus = function (factory) {
     var me = this
-    me.factory = factory || function (identifier) {
+    me.factory = factory || function (name) {
       return Promise.reject(new Error('must be implementing'))
     }
     me.ev = {}
