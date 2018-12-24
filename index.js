@@ -1,3 +1,14 @@
+/*
+ * promisified-resource-loader test file
+ *
+ * Copyright 2018, Vasyl Khrystiuk
+ * https://k.co.ua
+ *
+ * Licensed under Apache License 2.0
+ * So you'd probably to keep this header here.
+ * I love trains!
+ */
+
 (function () {
   var Bus = function (factory) {
     var me = this
