@@ -72,6 +72,7 @@
     }
 
     me.loadingTimeout = 5000
+    me.errorHandlerTimeOut = 5000
     var startLoading = function (name) {
       var factoryResult
       try{
@@ -87,9 +88,11 @@
         .then(function (template) {
           publishSuccess(name, template)
         }).catch(function (err) {
-          return new Promise(function (resolve, reject) {
+          return pt.timeout(new Promise(function (resolve, reject) {
             me.errorHandler(err, resolve, reject, name)
-          })
+          }).then(function (template) {
+            publishSuccess(name, template)
+          }), me.errorHandlerTimeOut)
       }).catch(function (err) {
         publishError(name, err)
       })
