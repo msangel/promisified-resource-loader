@@ -88,11 +88,14 @@
         .then(function (template) {
           publishSuccess(name, template)
         }).catch(function (err) {
-          return pt.timeout(new Promise(function (resolve, reject) {
-            me.errorHandler(err, resolve, reject, name)
-          }).then(function (template) {
+          return pt.timeout(
+            new Promise(function (resolve, reject) {
+              me.errorHandler(err, resolve, reject, name)
+            }),
+            me.errorHandlerTimeOut
+          ).then(function (template) {
             publishSuccess(name, template)
-          }), me.errorHandlerTimeOut)
+          })
       }).catch(function (err) {
         publishError(name, err)
       })
