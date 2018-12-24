@@ -11,7 +11,7 @@
 
 /* global beforeEach, afterEach, describe, it */
 
-var chai, chaiAsPromised, spies, Bus, delay, expect
+var chai, chaiAsPromised, spies, Bus, expect
 const isBrowser = this.window === this
 if (!isBrowser) {
   chai = require('chai')
@@ -19,7 +19,6 @@ if (!isBrowser) {
   spies = require('chai-spies')
   chai.use(spies)
   Bus = require('./../index');
-  delay = require('delay');
 }
 
 expect = chai.expect
@@ -32,21 +31,59 @@ chai.should()
 
 var bus
 
-beforeEach(function () {
-  // Initialize the sample data:
-  bus = new Bus(function (name) {
-
-  });
-})
 
 afterEach(function () {
 })
 
-describe('Template loading', function () {
-  it('String template promise', function (done) {
-    tmpl('{%=o.value%}', data).should.eventually.equal('value').notify(done)
+describe('sync factory for string key', function () {
+  beforeEach(function () {
+    // Initialize the sample data:
+    bus = new Bus(function (name) {
+      switch (name) {
+        case 'good':
+          return "here s: " + name
+        default:
+          throw new Error('this is error message');
+      }
+
+    });
   })
 
+  it('sync loading should be ok', function (done) {
+    bus.subscribe('good').should.eventually.equal('here s: good').notify(done)
+  })
+
+  it('sync loading should fail', function (done) {
+    bus.subscribe('bad').should.eventually.rejectedWith(/this is error message/, "should fail").notify(done)
+  })
+})
+
+describe('sync factory for object key', function () {
+  beforeEach(function () {
+    // Initialize the sample data:
+    bus = new Bus(function (name) {
+      if(name.good){
+        return "here s: good with:"+ name.payload
+      } else {
+        throw new Error('this is error message');
+      }
+    });
+  })
+
+  it('sync loading should be ok', function (done) {
+    bus.subscribe({good: true, payload: 'ok'}).should.eventually.equal('here s: good with:ok').notify(done)
+  })
+
+  it('sync loading should fail', function (done) {
+    bus.subscribe({}).should.eventually.rejectedWith(/this is error message/, "should fail").notify(done)
+  })
+})
+
+describe('async factory for string key', function () {
+
+})
+
+describe('else', function () {
   it('Load template by id', function (done) {
     done()
     // tmpl.byName('template', data).should.eventually.equal('value').notify(done)

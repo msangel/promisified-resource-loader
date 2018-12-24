@@ -18,6 +18,10 @@
     pt = require('promise-timeout')
   }
 
+  function isPromise(obj) {
+    return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+  }
+
   var Bus = function (factory) {
     var me = this
     me.factory = factory || function (name) {
@@ -69,7 +73,17 @@
 
     me.loadingTimeout = 5000
     var startLoading = function (name) {
-      pt.timeout(me.factory(name), me.loadingTimeout)
+      var factoryResult
+      try{
+        factoryResult = me.factory(name);
+        if (!isPromise(factoryResult)) {
+          factoryResult = Promise.resolve(factoryResult)
+        }
+      } catch (e) {
+        factoryResult = Promise.reject(e)
+      }
+
+      pt.timeout(factoryResult, me.loadingTimeout)
         .then(function (template) {
           publishSuccess(name, template)
         }).catch(function (err) {
