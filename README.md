@@ -1,11 +1,10 @@
 # promisified-resource-loader
 
 TODO list:
-- [ ] replace custom promise timeout with https://github.com/building5/promise-timeout#readme
-- [ ] replace `name` with `identifier` as we accent not only strings but arbitrary objects too
+- [x] replace custom promise timeout with https://github.com/building5/promise-timeout#readme
 - [ ] error resolving strategies 
-  - [ ] by default all errors are going to redirect to target promise error case(including timeout) `(err) => {if(err.isTimeOutError){}}`
-  - [ ] possibility to set global async error handler with signature `(error, resolve, reject, name)`
+  - [x] by default all errors are going to redirect to target promise error case(including timeout) `(err) => {if(err.isTimeOutError){}}`
+  - [x] possibility to set global async error handler with signature `(error, resolve, reject, name)`
 - [ ] test cases
   - [ ] sync loading OK
   - [ ] sync multiple call meanwhile (use big file or "slow connection" emulating like https://www.npmjs.com/package/json-server or https://github.com/cortesi/devd) OK

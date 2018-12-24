@@ -8,11 +8,19 @@
  * So you'd probably to keep this header here.
  * I love trains!
  */
-
 (function () {
+
+  var pt;
+  var isBrowser = this.window === this
+  if (isBrowser) {
+    pt = window.promiseTimeout
+  } else {
+    pt = require('promise-timeout')
+  }
+
   var Bus = function (factory) {
     var me = this
-    me.factory = factory || function (name) {
+    me.factory = factory || function (identifier) {
       return Promise.reject(new Error('must be implementing'))
     }
     me.ev = {}
@@ -23,10 +31,14 @@
       if (me.cache[name]) {
         return Promise.resolve(me.cache[name])
       } else {
-        var accept
-        var f = function (data) {
-          me.cache[name] = data
-          accept(data)
+        var mResolve, mReject;
+        var f = function (data, error) {
+          if(!error){
+            me.cache[name] = data
+            mResolve(data)
+          } else {
+            mReject(error)
+          }
         }
         if (typeof me.ev[name] === 'undefined') {
           startLoading(name)
@@ -34,11 +46,12 @@
         me.ev[name] = me.ev[name] || []
         me.ev[name].push(f)
         return new Promise(function (resolve, reject) {
-          accept = resolve
+          mResolve = resolve
+          mReject = reject
         })
       }
     }
-    var publish = function (name, template) {
+    var publishSuccess = function (name, template) {
       me.ev[name] = me.ev[name] || []
       for (let i = 0; i < me.ev[name].length; i++) {
         me.ev[name][i](template)
@@ -46,31 +59,39 @@
       me.ev[name] = []
     }
 
-    me.loadingTimeout = 5000
-    me.loadingTimeoutHandler = function (accept, reject, name) {
-      reject(new Error('loading of ' + name + ' takes too long'))
+    var publishError = function (name, error) {
+      me.ev[name] = me.ev[name] || []
+      for (let i = 0; i < me.ev[name].length; i++) {
+        me.ev[name][i](false, error)
+      }
+      delete me.ev[name]
     }
 
+    me.loadingTimeout = 5000
     var startLoading = function (name) {
-      var timeoutHandler
-      Promise.race([
-        me.factory(name),
-        new Promise(function (resolve, reject) {
-          timeoutHandler = setTimeout(function () {
-            me.loadingTimeoutHandler(resolve, reject, name)
-          }, me.loadingTimeout)
-        })
-      ]).then(function (template) {
-        if (timeoutHandler) {
-          clearTimeout(timeoutHandler)
-        }
-        publish(name, template)
+      pt.timeout(me.factory(name), me.loadingTimeout)
+        .then(function (template) {
+          publishSuccess(name, template)
+        }).catch(function (err) {
+          return new Promise(function (resolve, reject) {
+            me.errorHandler(err, resolve, reject, name)
+          })
+      }).catch(function (err) {
+        publishError(name, err)
       })
+    }
+
+    me.errorHandler = function (error, resolve, reject, name){
+      reject(error)
+    }
+    me.setErrorHandler = function (f) {
+      me.errorHandler = f;
     }
   }
 
-  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined')
+  if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
     module.exports = Bus;
-  else
+  } else {
     window.Bus = Bus;
+  }
 })();

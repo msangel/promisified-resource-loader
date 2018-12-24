@@ -28,7 +28,6 @@ chai.use(chaiAsPromised)
 chai.should()
 
 
-
 'use strict'
 
 var bus
