@@ -4,8 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "unit": "mocha",
+    "test": "npm run unit",
+    "postinstall": "./install_browser_testing_env.sh"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "node": "v11.4.0",
+    "browserify": "^16.2.3",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "chai-spies": "^1.0.0",
+    "delay": "^4.1.0",
+    "mocha": "^5.2.0"
+  }
 }
