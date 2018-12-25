@@ -26,4 +26,4 @@ cp ./node_modules/mocha/mocha.js           ./test/vendor/mocha.js
 cp ./node_modules/mocha/mocha.css          ./test/vendor/mocha.css
 cp ./node_modules/chai-spies/chai-spies.js ./test/vendor/chai-spies.js
 
-echo -e "files created test/vendor/{mocha.js, mocha.css, chai.js, chai-as-promised.js, chai-spies.js, promise-timeout.js} \e[93mOK"
+echo -e "files under test/vendor/ created \e[93mOK"
