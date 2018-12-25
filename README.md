@@ -21,7 +21,8 @@ TODO list:
         - [ ] use static existing value (most popular case - existing "show error" resource)
     - [ ] reject with custom error
   - [ ] use string `name` together with `{ id: "someId", someDataLikeHostOEtc: "localhost", lang: "RU"}` as a key
-- [ ] node support   
+- [ ] node support 
+- [ ] as far as using objects as a keys require external library, this possibility should be pluggable, like: `<script src="./promisified-resource-loader-support-object-keys.js"></script>`  
 - [ ] documentation
 - [ ] npm publish
      

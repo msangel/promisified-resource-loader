@@ -64,6 +64,8 @@ describe('sync factory for object key', function () {
     bus = new Bus(function (name) {
       if(name.good){
         return "here s: good with:"+ name.payload
+      } else if(name.cat){
+        return "cat is good"
       } else {
         throw new Error('this is error message');
       }
@@ -75,7 +77,27 @@ describe('sync factory for object key', function () {
   })
 
   it('sync loading should fail', function (done) {
-    bus.subscribe({}).should.eventually.rejectedWith(/this is error message/, "should fail").notify(done)
+    bus.subscribe({error:true}).should.eventually.rejectedWith(/this is error message/, "should fail").notify(done)
+  })
+
+  it('object as a key should not trigger two loadings for equal objects', function (done) {
+    chai.spy.on(bus, 'factory');
+
+    bus.subscribe({unicorn:'rainbow', cat: 'is fine too'})
+    bus.subscribe({cat: 'is fine too', unicorn:'rainbow'})
+
+    bus.factory.should.have.been.called.once
+    bus.subscribe({cat: 'is fine too', unicorn:'rainbow'}).should.eventually.notify(done)
+  })
+
+  it('object as a key should trigger two loadings for different objects', function (done) {
+    chai.spy.on(bus, 'factory');
+
+    bus.subscribe({unicorn:'rainbow!!!', cat: 'is fine too'})
+    bus.subscribe({cat: 'is fine too', unicorn:'rainbow'})
+
+    bus.factory.should.have.been.called.twice
+    bus.subscribe({cat: 'is fine too', unicorn:'rainbow'}).should.eventually.notify(done)
   })
 })
 

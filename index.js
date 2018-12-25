@@ -10,16 +10,30 @@
  */
 (function () {
 
-  var pt;
+  var pt, sha1;
   var isBrowser = this.window === this
   if (isBrowser) {
     pt = window.promiseTimeout
+    sha1 = window.jsonHash.digest
   } else {
     pt = require('promise-timeout')
+    sha1 = require('json-hash').digest
   }
 
   function isPromise(obj) {
     return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+  }
+
+  function isString(myVar) {
+    return (typeof myVar === 'string' || myVar instanceof String)
+  }
+
+  function getAsString(val) {
+    if(isString(val)){
+      return val;
+    } else {
+      return sha1(val)
+    }
   }
 
   var Bus = function (factory) {
@@ -31,24 +45,29 @@
     me.cache = {}
     me.subscribe = function (name) {
       console.log('subscribe on: ', name)
-      console.log('me.cache[name]: ', me.cache[name])
-      if (me.cache[name]) {
-        return Promise.resolve(me.cache[name])
+
+      var key = getAsString(name);
+
+      console.log('me.cache[name]: ', me.cache[key])
+      if (me.cache[key]) {
+        return Promise.resolve(me.cache[key])
       } else {
         var mResolve, mReject;
         var f = function (data, error) {
           if(!error){
-            me.cache[name] = data
+            me.cache[key] = data
             mResolve(data)
           } else {
             mReject(error)
           }
         }
-        if (typeof me.ev[name] === 'undefined') {
+
+        if (typeof me.ev[key] === 'undefined') {
           startLoading(name)
         }
-        me.ev[name] = me.ev[name] || []
-        me.ev[name].push(f)
+
+        me.ev[key] = me.ev[key] || []
+        me.ev[key].push(f)
         return new Promise(function (resolve, reject) {
           mResolve = resolve
           mReject = reject
@@ -56,19 +75,21 @@
       }
     }
     var publishSuccess = function (name, template) {
-      me.ev[name] = me.ev[name] || []
-      for (let i = 0; i < me.ev[name].length; i++) {
-        me.ev[name][i](template)
+      var key = getAsString(name);
+      me.ev[key] = me.ev[key] || []
+      for (let i = 0; i < me.ev[key].length; i++) {
+        me.ev[key][i](template)
       }
-      me.ev[name] = []
+      me.ev[key] = []
     }
 
     var publishError = function (name, error) {
-      me.ev[name] = me.ev[name] || []
-      for (let i = 0; i < me.ev[name].length; i++) {
-        me.ev[name][i](false, error)
+      var key = getAsString(name);
+      me.ev[key] = me.ev[key] || []
+      for (let i = 0; i < me.ev[key].length; i++) {
+        me.ev[key][i](false, error)
       }
-      delete me.ev[name]
+      delete me.ev[key]
     }
 
     me.loadingTimeout = 5000

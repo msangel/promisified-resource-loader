@@ -18,6 +18,10 @@ if [[ $? -ne 0 ]]; then
     echo -e "\e[31mbrowserify fail" && exit $?;
 fi
 
+./node_modules/.bin/node ./node_modules/.bin/browserify ./node_modules/json-hash/lib/browser.js --standalone json-hash -o ./test/vendor/json-hash.js
+if [[ $? -ne 0 ]]; then
+    echo -e "\e[31mbrowserify fail" && exit $?;
+fi
 
 
 
