@@ -125,8 +125,9 @@
     me.errorHandler = function (error, resolve, reject, name){
       reject(error)
     }
-    me.setErrorHandler = function (f) {
+    me.withErrorHandler = function (f) {
       me.errorHandler = f;
+      return me
     }
   }
 

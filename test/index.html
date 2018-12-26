@@ -29,8 +29,9 @@
 <script src="vendor/chai-spies.js"></script>
 <script src="vendor/promise-timeout.js"></script>
 <script src="vendor/json-hash.js"></script>
+<script src="vendor/timeout-as-promise.js"></script>
 <script>
-mocha.setup('bdd');
+mocha.setup({ timeout: 5000 , ui:'bdd'});
 </script>
 <div>content</div>
 <script src="../index.js"></script>

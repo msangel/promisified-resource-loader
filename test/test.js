@@ -9,9 +9,8 @@
  * I love trains!
  */
 
-/* global beforeEach, afterEach, describe, it */
-
-var chai, chaiAsPromised, spies, Bus, expect
+/* global window, beforeEach, afterEach, describe, it */
+var chai, chaiAsPromised, spies, Bus, delay
 const isBrowser = this.window === this
 if (!isBrowser) {
   chai = require('chai')
@@ -19,9 +18,10 @@ if (!isBrowser) {
   spies = require('chai-spies')
   chai.use(spies)
   Bus = require('./../index');
+  delay = require('timeout-as-promise');
+} else {
+  delay = window.timeoutAsPromise;
 }
-
-expect = chai.expect
 
 chai.use(chaiAsPromised)
 chai.should()
@@ -37,7 +37,6 @@ afterEach(function () {
 
 describe('sync factory for string key', function () {
   beforeEach(function () {
-    // Initialize the sample data:
     bus = new Bus(function (name) {
       switch (name) {
         case 'good':
@@ -53,6 +52,15 @@ describe('sync factory for string key', function () {
     bus.subscribe('good').should.eventually.equal('here s: good').notify(done)
   })
 
+  it('sync loading should not trigger more loadings for same name', async function () {
+    chai.spy.on(bus, 'factory');
+    bus.subscribe('good').should.eventually.equal('here s: good')
+    bus.subscribe('good').should.eventually.equal('here s: good')
+    bus.factory.should.have.been.called.once
+    await bus.subscribe('good')
+    bus.factory.should.have.been.called.once
+  })
+
   it('sync loading should fail', function (done) {
     bus.subscribe('bad').should.eventually.rejectedWith(/this is error message/, "should fail").notify(done)
   })
@@ -60,7 +68,6 @@ describe('sync factory for string key', function () {
 
 describe('sync factory for object key', function () {
   beforeEach(function () {
-    // Initialize the sample data:
     bus = new Bus(function (name) {
       if(name.good){
         return "here s: good with:"+ name.payload
@@ -87,7 +94,10 @@ describe('sync factory for object key', function () {
     bus.subscribe({cat: 'is fine too', unicorn:'rainbow'})
 
     bus.factory.should.have.been.called.once
-    bus.subscribe({cat: 'is fine too', unicorn:'rainbow'}).should.eventually.notify(done)
+    bus.subscribe({cat: 'is fine too', unicorn:'rainbow'}).then(function () {
+      bus.factory.should.have.been.called.once
+      bus.subscribe({cat: 'is fine too', unicorn:'rainbow'}).should.eventually.notify(done)
+    })
   })
 
   it('object as a key should trigger two loadings for different objects', function (done) {
@@ -102,248 +112,119 @@ describe('sync factory for object key', function () {
 })
 
 describe('async factory for string key', function () {
-
-})
-
-describe('else', function () {
-  it('Load template by id', function (done) {
-    done()
-    // tmpl.byName('template', data).should.eventually.equal('value').notify(done)
-  })
-
-  it('Return function when called without data parameter', function (done) {
-    tmpl('{%=o.value%}')(data).should.eventually.equal('value').notify(done)
-  })
-
-  it('Concurrent call for template loading should not call loading twice and should be resolved together with first', function (done) {
-    tmpl.load = function (id) {
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          switch (id) {
-            case 'template':
-              resolve('{%=o.value%}')
-          }
-          reject(new Error(''))
-        }, 10)
-      }).then(function (template) {
-        done()
-        return Promise.resolve(template)
-      }).catch(function (error) {
-        done(error)
-      })
-    }
-
-    chai.spy.on(tmpl, 'load');
-
-    tmpl.byName('template', data)
-    tmpl.byName('template', data)
-    tmpl.load.should.have.been.called.once
-  })
-
-  it('If load function return undefined value the error should be visible', function (done) {
-    tmpl.load = function (id) {
-      return function () {
-        return new Promise(function (resolve, reject) {
-          setTimeout(function () {
-            switch (id) {
-              case 'template':
-                resolve('{%=o.value%}')
-            }
-            reject(new Error(''))
-          }, 10)
-        }).then(function (template) {
-          return;
-        })
+  beforeEach(function () {
+    bus = new Bus(async function (name) {
+      await delay(30)
+      switch (name) {
+        case 'good': return 'fine then'
+        case 'bad': throw new Error('error case')
       }
-    }
-
-    tmpl.byName('template', data).should.eventually.rejectedWith(/template is undefined/).notify(done)
+    });
+    bus.loadingTimeout = 5000
   })
 
-  it('If load function return Promise but not function the error should be visible', function (done) {
-    tmpl.load = function (id) {
-      return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-          switch (id) {
-            case 'template':
-              resolve('{%=o.value%}')
-          }
-          reject(new Error(''))
-        }, 10)
-      })
-    }
-
-    tmpl.byName('template', data).should.eventually.rejectedWith(/function should not return Promise itself/).notify(done)
+  it('async loading OK', async function () {
+    bus.subscribe('good').should.eventually.eq('fine then')
   })
 
+  it('async multiple call meanwhile OK', async function () {
+    chai.spy.on(bus, 'factory');
+    bus.subscribe('good').should.eventually.eq('fine then')
+    bus.subscribe('good').should.eventually.eq('fine then')
+    bus.factory.should.have.been.called.once
+    await bus.subscribe('good')
+    await bus.subscribe('good')
+    bus.factory.should.have.been.called.once
+  })
 
-  it('Hanging loading should fire a handler', function (done) {
-    const array = [1, 2, 3];
-    chai.spy.on(array, 'push');
-    array.push(4)
-    array.push.should.have.been.called();
-    done()
+  it('async loading error are not cached', async function () {
+    chai.spy.on(bus, 'factory');
+    await bus.subscribe('bad').should.eventually.rejectedWith(/error case/)
+    bus.factory.should.have.been.called.once
+    await bus.subscribe('bad').should.eventually.rejectedWith(/error case/)
+    bus.factory.should.have.been.called.twice
+  })
+
+  it('async loading sync error(in factory implementation)', async function () {
+    bus = new Bus(function (name) {
+      throw new Error('error in factory method')
+    });
+    chai.spy.on(bus, 'factory');
+
+    await Promise.all([
+        bus.subscribe('any').should.eventually.rejectedWith(/error in factory method/)
+      , bus.subscribe('any').should.eventually.rejectedWith(/error in factory method/)
+    ])
+    bus.factory.should.have.been.called.once
+    await bus.subscribe('any').should.eventually.rejectedWith(/error in factory method/)
+    bus.factory.should.have.been.called.twice
+  })
+
+  it('timeout error must be in usual promise flow', async function () {
+    bus.loadingTimeout = 10
+    bus.subscribe('any').should.eventually.rejectedWith(Error).and.have.property('name', 'TimeoutError')
+  })
+
+  it('timeout error must be in usual promise flow multiple times', async function () {
+    bus.loadingTimeout = 10
+    chai.spy.on(bus, 'factory');
+    await bus.subscribe('any').should.eventually.rejectedWith(Error).and.have.property('name', 'TimeoutError')
+    bus.factory.should.have.been.called.once
+    await Promise.all([
+      bus.subscribe('any').should.eventually.rejectedWith(Error).and.have.property('name', 'TimeoutError')
+      , bus.subscribe('any').should.eventually.rejectedWith(Error).and.have.property('name', 'TimeoutError')
+    ])
+
+    bus.factory.should.have.been.called.twice
+  })
+
+  it('underlying error(like transport error 404 and 501) must be in usual promise flow, error details must be delivered as is', async function () {
+    var err;
+    try{
+      a.b.c
+    } catch (e) {
+      err = e
+    }
+
+    bus = new Bus(async function (name) {
+      await delay()
+      throw err
+    });
+
+    try {
+      await bus.subscribe('any')
+    } catch (e) {
+      err.should.equals(e)
+    }
   })
 })
 
-describe('Interpolation', function () {
-  it('Escape HTML special characters with {%=o.prop%}', function () {
-    expect(tmpl('{%=o.special%}', data)).to.equal('&lt;&gt;&amp;&quot;&#39;')
+describe('async error handler exists', function () {
+  beforeEach(function () {
+    bus = new Bus(async function (name) {
+      await delay()
+      switch (name) {
+        case 'good': return 'fine then'
+        case 'bad': throw new Error('error case')
+      }
+    })
+    bus.loadingTimeout = 5000
   })
 
-  it('Allow HTML special characters with {%#o.prop%}', function () {
-    expect(tmpl('{%#o.special%}', data)).to.equal('<>&"\'\x00')
+  it('global error handler should not be called if no error', async function () {
+    bus.withErrorHandler(function (error, resolve, reject, name) {
+    })
+    await bus.subscribe('good')
   })
 
-  it('Function call', function () {
-    expect(tmpl('{%=o.func()%}', data)).to.equal('value')
+  it('global error handler should be called if no error', async function () {
+    bus.withErrorHandler(function (error, resolve, reject, name) {
+      should.fail()
+      expect.fail()
+      reject(error)
+    })
+    await bus.subscribe('bad').should.eventually.rejected
   })
 
-  it('Dot notation', function () {
-    expect(tmpl('{%=o.deep.value%}', data)).to.equal('value')
-  })
-
-  it('Handle single quotes', function () {
-    expect(tmpl("'single quotes'{%=\": '\"%}", data)).to.equal(
-      "'single quotes': &#39;"
-    )
-  })
-
-  it('Handle double quotes', function () {
-    expect(tmpl('"double quotes"{%=": \\""%}', data)).to.equal(
-      '"double quotes": &quot;'
-    )
-  })
-
-  it('Handle backslashes', function () {
-    expect(tmpl('\\backslashes\\{%=": \\\\"%}', data)).to.equal(
-      '\\backslashes\\: \\'
-    )
-  })
-
-  it('Interpolate escaped falsy values except undefined or null', function () {
-    expect(
-      tmpl(
-        '{%=o.undefinedValue%}' +
-        '{%=o.nullValue%}' +
-        '{%=o.falseValue%}' +
-        '{%=o.zeroValue%}',
-        data
-      )
-    ).to.equal('false0')
-  })
-
-  it('Interpolate unescaped falsy values except undefined or null', function () {
-    expect(
-      tmpl(
-        '{%#o.undefinedValue%}' +
-        '{%#o.nullValue%}' +
-        '{%#o.falseValue%}' +
-        '{%#o.zeroValue%}',
-        data
-      )
-    ).to.equal('false0')
-  })
-
-  it('Preserve whitespace', function () {
-    expect(tmpl('\n\r\t{%=o.value%}  \n\r\t{%=o.value%}  ', data)).to.equal(
-      '\n\r\tvalue  \n\r\tvalue  '
-    )
-  })
-})
-
-describe('Evaluation', function () {
-  it('Escape HTML special characters with print(data)', function () {
-    expect(tmpl('{% print(o.special); %}', data)).to.equal(
-      '&lt;&gt;&amp;&quot;&#39;'
-    )
-  })
-
-  it('Allow HTML special characters with print(data, true)', function () {
-    expect(tmpl('{% print(o.special, true); %}', data)).to.equal('<>&"\'\x00')
-  })
-
-  it('Print out escaped falsy values except undefined or null', function () {
-    expect(
-      tmpl(
-        '{% print(o.undefinedValue); %}' +
-        '{% print(o.nullValue); %}' +
-        '{% print(o.falseValue); %}' +
-        '{% print(o.zeroValue); %}',
-        data
-      )
-    ).to.equal('false0')
-  })
-
-  it('Print out unescaped falsy values except undefined or null', function () {
-    expect(
-      tmpl(
-        '{% print(o.undefinedValue, true); %}' +
-        '{% print(o.nullValue, true); %}' +
-        '{% print(o.falseValue, true); %}' +
-        '{% print(o.zeroValue, true); %}',
-        data
-      )
-    ).to.equal('false0')
-  })
-
-  it('Include template', function () {
-    expect(
-      tmpl('{% include("template", {value: "value"}); %}', data)
-    ).to.equal('value')
-  })
-
-  it('If condition', function () {
-    expect(
-      tmpl('{% if (o.value) { %}true{% } else { %}false{% } %}', data)
-    ).to.equal('true')
-  })
-
-  it('Else condition', function () {
-    expect(
-      tmpl(
-        '{% if (o.undefinedValue) { %}false{% } else { %}true{% } %}',
-        data
-      )
-    ).to.equal('true')
-  })
-
-  it('For loop', function () {
-    expect(
-      tmpl(
-        '{% for (var i=0; i<o.list.length; i++) { %}' +
-        '{%=o.list[i]%}{% } %}',
-        data
-      )
-    ).to.equal('12345')
-  })
-
-  it('For loop print call', function () {
-    expect(
-      tmpl(
-        '{% for (var i=0; i<o.list.length; i++) {' + 'print(o.list[i]);} %}',
-        data
-      )
-    ).to.equal('12345')
-  })
-
-  it('For loop include template', function () {
-    expect(
-      tmpl(
-        '{% for (var i=0; i<o.list.length; i++) {' +
-        'include("template", {value: o.list[i]});} %}',
-        data
-      ).replace(/[\r\n]/g, '')
-    ).to.equal('12345')
-  })
-
-  it('Modulo operator', function () {
-    expect(
-      tmpl(
-        '{% if (o.list.length % 5 === 0) { %}5 list items{% } %}',
-        data
-      ).replace(/[\r\n]/g, '')
-    ).to.equal('5 list items')
-  })
 })
 

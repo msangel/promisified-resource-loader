@@ -8,12 +8,12 @@ TODO list:
 - [ ] test cases
   - [x] sync loading OK (name/object)
   - [x] sync loading error (name/object)
-  - [ ] async loading OK
-  - [ ] async multiple call meanwhile OK
-  - [ ] async loading error
-  - [ ] async loading sync error(in factory implementation)
-  - [ ] timeout error must be in usual promise flow
-  - [ ] transport error(let use 404 and 501) must be in usual promise flow, error detail must be delivered as is
+  - [x] async loading OK
+  - [x] async multiple call meanwhile OK
+  - [x] async loading error
+  - [x] async loading sync error(in factory implementation)
+  - [x] timeout error must be in usual promise flow
+  - [x] underlying error(like transport error 404 and 501) must be in usual promise flow, error details must be delivered as is
   - [ ] global async error handler exists 
     - [ ] doing nothing in special timeout should print warning
     - [ ] accept with another value
@@ -26,6 +26,6 @@ TODO list:
 - [ ] documentation
 - [ ] npm publish
      
-  
+  https://www.npmjs.com/package/stable-sha1
   
   

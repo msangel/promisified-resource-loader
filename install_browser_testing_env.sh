@@ -21,6 +21,9 @@ verify
 ./node_modules/.bin/node ./node_modules/.bin/browserify ./node_modules/json-hash/lib/browser.js --standalone json-hash -o ./test/vendor/json-hash.js
 verify
 
+./node_modules/.bin/node ./node_modules/.bin/browserify ./node_modules/timeout-as-promise/index.js --standalone timeout-as-promise -o ./test/vendor/timeout-as-promise.js
+verify
+
 
 cp ./node_modules/mocha/mocha.js           ./test/vendor/mocha.js
 cp ./node_modules/mocha/mocha.css          ./test/vendor/mocha.css
