@@ -217,7 +217,7 @@ describe('async error handler exists', function () {
     await bus.subscribe('good')
   })
 
-  it('global error handler should be called if no error', async function () {
+  it('global error handler should be called if error', async function () {
     bus.withErrorHandler(function (error, resolve, reject, name) {
       should.fail()
       expect.fail()
