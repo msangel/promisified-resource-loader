@@ -62,7 +62,7 @@ describe('sync factory for string key', function () {
   })
 
   it('sync loading should fail', function (done) {
-    bus.subscribe('bad').should.eventually.rejectedWith(/this is error message/, "should fail").notify(done)
+    bus.subscribe('bad').should.eventually.rejectedWith(/this is error message/).notify(done)
   })
 })
 
