@@ -10,7 +10,7 @@
  */
 
 /* global window, beforeEach, afterEach, describe, it */
-var chai, chaiAsPromised, spies, Bus, delay
+var chai, chaiAsPromised, spies, Bus, delay, should
 const isBrowser = this.window === this
 if (!isBrowser) {
   chai = require('chai')
@@ -24,7 +24,7 @@ if (!isBrowser) {
 }
 
 chai.use(chaiAsPromised)
-chai.should()
+should = chai.should()
 
 
 'use strict'
@@ -213,18 +213,81 @@ describe('async error handler exists', function () {
 
   it('global error handler should not be called if no error', async function () {
     bus.withErrorHandler(function (error, resolve, reject, name) {
+      should.fail("should not be called")
     })
     await bus.subscribe('good')
   })
 
   it('global error handler should be called if error', async function () {
-    bus.withErrorHandler(function (error, resolve, reject, name) {
-      should.fail()
-      expect.fail()
+    let spyHandler = chai.spy(function (error, resolve, reject, name) {
       reject(error)
     })
-    await bus.subscribe('bad').should.eventually.rejected
+    bus.withErrorHandler(spyHandler)
+    await bus.subscribe('bad').should.eventually.rejectedWith(/error case/)
+    spyHandler.should.have.been.called()
+  })
+
+  it('doing nothing in special timeout should raise error', async function () {
+    let spyHandler = chai.spy(function (error, resolve, reject, name) {
+
+    })
+    bus.loadingTimeout = 50
+    bus.errorHandlerTimeOut = 150
+    bus.withErrorHandler(spyHandler)
+    await bus.subscribe('bad').should.eventually.rejectedWith(/Timeout/)
+    spyHandler.should.have.been.called()
+  })
+
+  it('doing nothing in special timeout when the timeout is negative should not raise error', async function () {
+    bus.loadingTimeout = 50
+    bus.errorHandlerTimeOut = -1
+    bus.withErrorHandler(function (error, resolve, reject, name) {
+      // never do this
+    })
+    var spy = chai.spy(function () {
+      return Promise.resolve()
+    })
+    await Promise.race([bus.subscribe('bad'), delay(200).then(spy)])
+    spy.should.have.been.called()
+  })
+
+  it('on error error handler should use another name and success', async function () {
+    bus.withErrorHandler(function (error, resolve, reject, name) {
+      name.should.eq('bad')
+      bus.subscribe('good').then(resolve)
+    })
+    await bus.subscribe('bad').should.eventually.eq('fine then')
+  })
+
+  it('on error error handler should use static existing value', async function () {
+    bus.withErrorHandler(function (error, resolve, reject, name) {
+      name.should.eq('bad')
+      resolve('perfect!')
+    })
+    await bus.subscribe('bad').should.eventually.eq('perfect!')
+  })
+
+  it('on error error handler should reject with custom error', async function () {
+    bus.withErrorHandler(function (error, resolve, reject, name) {
+      name.should.eq('bad')
+      reject(new Error('oh no!'))
+    })
+    await bus.subscribe('bad').should.eventually.rejectedWith(/oh no!/)
+  })
+})
+
+describe('some async scenarios for object key', function () {
+
+  beforeEach(function () {
+    bus = new Bus(async function (name) {
+      await delay()
+      if(name.good){
+        return 'fine then'
+      } else if(name.bad) {
+        throw new Error('error case')
+      }
+    })
+    bus.loadingTimeout = 5000
   })
 
 })
-

@@ -117,14 +117,20 @@
               .then(function (template) {
                   publishSuccess(name, template)
               }).catch(function (err) {
-              return pt.timeout(
-                  new Promise(function (resolve, reject) {
-                      errorHandler(err, resolve, reject, name)
-                  }),
-                  me.errorHandlerTimeOut
-              ).then(function (template) {
+
+
+              var promise = new Promise(function (resolve, reject) {
+                  errorHandler(err, resolve, reject, name)
+              })
+
+              if(me.errorHandlerTimeOut>=0) {
+                  promise = pt.timeout(promise, me.errorHandlerTimeOut)
+              }
+
+              return promise.then(function (template) {
                   publishSuccess(name, template)
               })
+
           }).catch(function (err) {
               publishError(name, err)
           })
