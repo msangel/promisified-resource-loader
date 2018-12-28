@@ -1,6 +1,6 @@
 // Type definitions for promisified-resource-loader 1.0.0
-// Project: https://github.com/baz/foo (Does not have to be to GitHub, but prefer linking to a source code repository rather than to a project website.)
-// Definitions by: My Self <https://github.com/me>
+// Project: https://github.com/msangel/promisified-resource-loader
+// Definitions by: Vasyl Khrystiuk <https://github.com/msangel/>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 export interface Bus {
