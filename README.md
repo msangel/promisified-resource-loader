@@ -26,7 +26,7 @@ TODO list:
 - [ ] node support 
 - [ ] as far as using objects as a keys require external library, this possibility should be pluggable, like: `<script src="./promisified-resource-loader-support-object-keys.js"></script>`  
 - [ ] documentation
-- [ ] propper bundle with https://github.com/DefinitelyTyped/DefinitelyTyped
+- [ ] proper bundle with https://github.com/DefinitelyTyped/DefinitelyTyped
 - [ ] npm publish
      
   

@@ -11,7 +11,7 @@
 
 /* global window, beforeEach, afterEach, describe, it */
 var chai, chaiAsPromised, spies, Bus, delay, should
-const isBrowser = this.window === this
+var isBrowser = this.window === this
 if (!isBrowser) {
   chai = require('chai')
   chaiAsPromised = require('chai-as-promised')
@@ -19,11 +19,9 @@ if (!isBrowser) {
   chai.use(spies)
   Bus = require('./../index');
   delay = require('timeout-as-promise');
-} else {
-  delay = window.timeoutAsPromise;
+  chai.use(chaiAsPromised)
 }
 
-chai.use(chaiAsPromised)
 should = chai.should()
 
 
