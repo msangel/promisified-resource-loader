@@ -29,5 +29,7 @@ TODO list:
 - [ ] proper bundle with https://github.com/DefinitelyTyped/DefinitelyTyped
 - [ ] npm publish
      
+     
+     https://github.com/sindresorhus/crypto-hash#readme
   
   
