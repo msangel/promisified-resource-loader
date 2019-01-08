@@ -2,6 +2,7 @@
 
 TODO list:
 - [x] replace custom promise timeout with https://github.com/building5/promise-timeout#readme
+- [ ] [enable eslint](https://eslint.org/docs/user-guide/configuring)
 - [ ] error resolving strategies 
   - [x] by default all errors are going to redirect to target promise error case(including timeout) `(err) => {if(err.isTimeOutError){}}`
   - [x] possibility to set global async error handler with signature `(error, resolve, reject, name)`

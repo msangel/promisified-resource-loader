@@ -1,0 +1,4 @@
+!.eslintrc.js
+js/*.min.js
+test/vendor
+node_modules
