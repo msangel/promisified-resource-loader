@@ -9,7 +9,7 @@
  * I love trains!
  */
 
-/* global window, beforeEach, afterEach, describe, it */
+/* eslint no-unused-vars: [ 2, { "varsIgnorePattern": "should" }] */
 var chai, chaiAsPromised, spies, Bus, delay, should
 var isBrowser = this.window === this
 if (!isBrowser) {
@@ -23,8 +23,6 @@ if (!isBrowser) {
 }
 
 should = chai.should()
-
-'use strict'
 
 var bus
 
