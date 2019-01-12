@@ -46,8 +46,8 @@
       return Promise.reject(new Error('must be implementing'))
     }
 
-    var errorHandler = function (error, resolve, reject, name) {
-      reject(error)
+    var errorHandler = function (error, name) {
+      return error
     }
     var ev = {}
     var cache = {}
@@ -116,7 +116,14 @@
           publishSuccess(name, template)
         }).catch(function (err) {
           var promise = new Promise(function (resolve, reject) {
-            errorHandler(err, resolve, reject, name)
+            var errorHandlingRes = errorHandler(err, name)
+            if (isPromise(errorHandlingRes)) {
+              errorHandlingRes.then(resolve).catch(reject)
+            } else if (isString(errorHandlingRes)) {
+              resolve(errorHandlingRes)
+            } else {
+              reject(errorHandlingRes)
+            }
           })
 
           if (me.errorHandlerTimeOut >= 0) {

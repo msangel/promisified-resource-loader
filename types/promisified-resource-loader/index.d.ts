@@ -8,5 +8,5 @@ export interface Bus {
     subscribe: (name: string|object) => Promise<any>
     loadingTimeout: number
     errorHandlerTimeOut: number
-    withErrorHandler: (fun: (error: Error, resolve: (value: any)=>undefined, reject: (value: any)=>undefined , name: string| object )=>undefined) => Bus
+    withErrorHandler: (fun: (error: Error, name: string| object )=>undefined) => Bus
 }

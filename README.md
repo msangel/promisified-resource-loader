@@ -6,7 +6,7 @@ TODO list:
 - [ ] error resolving strategies 
   - [x] by default all errors are going to redirect to target promise error case(including timeout) `(err) => {if(err.isTimeOutError){}}`
   - [x] possibility to set global async error handler with signature `(error, resolve, reject, name)`
-- [ ] test cases
+- [x] test cases
   - [x] sync loading OK (name/object)
   - [x] sync loading error (name/object)
   - [x] async loading OK
@@ -22,9 +22,9 @@ TODO list:
         - [x] retry with another name
         - [x] use static existing value (most popular case - existing "show error" resource)
     - [x] reject with custom error
-  - [ ] use string `name` together with `{ id: "someId", someDataLikeHostOEtc: "localhost", lang: "RU"}` as a key
-- [ ] error handler should accept `error, name` and return promise (if it is not promise - the result will be wrapped with Promise.resolve())
-- [ ] node support 
+  - [x] use string `name` together with `{ id: "someId", someDataLikeHostOEtc: "localhost", lang: "RU"}` as a key
+- [x] error handler should accept `error, name` and return promise (if it is spring - the result will be wrapped with Promise.resolve(), otherwise wrapped with Promise.reject())
+- [ ] node support
 - [ ] as far as using objects as a keys require external library, this possibility should be pluggable, like: `<script src="./promisified-resource-loader-support-object-keys.js"></script>`  
 - [ ] documentation
 - [ ] proper bundle with https://github.com/DefinitelyTyped/DefinitelyTyped

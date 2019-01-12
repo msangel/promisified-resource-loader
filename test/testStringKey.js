@@ -9,7 +9,7 @@
  * I love trains!
  */
 
-/* global window, beforeEach, afterEach, describe, it */
+/* eslint no-unused-vars: [ 2, { "varsIgnorePattern": "should" }] */
 var chai, chaiAsPromised, spies, Bus, delay, should
 var isBrowser = this.window === this
 if (!isBrowser) {
@@ -35,31 +35,44 @@ describe('sync factory for string key', function () {
       switch (name) {
         case 'good':
           return 'here s: ' + name
+        case 'better':
+          return 'here s better: ' + name
         default:
           throw new Error('this is error message')
       }
     })
   })
 
+  var goodKey = 'good'
+  var goodExpected = 'here s: good'
+  var badKey = 'bad'
+
   it('sync loading should be ok', function (done) {
-    bus.subscribe('good').should.eventually.equal('here s: good').notify(done)
+    bus.subscribe(goodKey).should.eventually.equal(goodExpected).notify(done)
   })
 
   it('sync loading should not trigger more loadings for same name', async function () {
     chai.spy.on(bus, 'factory')
-    bus.subscribe('good').should.eventually.equal('here s: good')
-    bus.subscribe('good').should.eventually.equal('here s: good')
+    bus.subscribe(goodKey).should.eventually.equal(goodExpected)
+    bus.subscribe(goodKey).should.eventually.equal(goodExpected)
     bus.factory.should.have.been.called.once
-    await bus.subscribe('good')
+    await bus.subscribe(goodKey)
     bus.factory.should.have.been.called.once
   })
 
-  it('sync loading should fail', function (done) {
-    bus.subscribe('bad').should.eventually.rejectedWith(/this is error message/).notify(done)
+  it('sync loading should fail', async function () {
+    await bus.subscribe(badKey).should.eventually.rejectedWith(/this is error message/, 'should fail')
+  })
+
+  it('different keys should trigger two loadings', async function () {
+    chai.spy.on(bus, 'factory')
+    await bus.subscribe('good')
+    await bus.subscribe('better')
+    bus.factory.should.have.been.called.twice
   })
 })
 
-describe('async factory for string key', function () {
+describe('async factory cases', function () {
   beforeEach(function () {
     bus = new Bus(async function (name) {
       await delay(30)
@@ -74,7 +87,7 @@ describe('async factory for string key', function () {
   })
 
   it('async loading OK', async function () {
-    bus.subscribe('good').should.eventually.eq('fine then')
+    await bus.subscribe('good').should.eventually.eq('fine then')
   })
 
   it('async multiple call meanwhile OK', async function () {
@@ -96,7 +109,7 @@ describe('async factory for string key', function () {
   })
 
   it('async loading sync error(in factory implementation)', async function () {
-    bus = new Bus(function (name) {
+    bus = new Bus(function () {
       throw new Error('error in factory method')
     })
     chai.spy.on(bus, 'factory')
@@ -112,7 +125,7 @@ describe('async factory for string key', function () {
 
   it('timeout error must be in usual promise flow', async function () {
     bus.loadingTimeout = 10
-    bus.subscribe('any').should.eventually.rejectedWith(Error).and.have.property('name', 'TimeoutError')
+    await bus.subscribe('any').should.eventually.rejectedWith(Error).and.have.property('name', 'TimeoutError')
   })
 
   it('timeout error must be in usual promise flow multiple times', async function () {
@@ -164,15 +177,15 @@ describe('async error handler exists', function () {
   })
 
   it('global error handler should not be called if no error', async function () {
-    bus.withErrorHandler(function (error, resolve, reject, name) {
-      should.fail('should not be called')
+    bus.withErrorHandler(async function (error, name) { // eslint-disable-line no-unused-vars, handle-callback-err
+      await should.fail('should not be called')
     })
     await bus.subscribe('good')
   })
 
   it('global error handler should be called if error', async function () {
-    let spyHandler = chai.spy(function (error, resolve, reject, name) {
-      reject(error)
+    let spyHandler = chai.spy(function (error, name) { // eslint-disable-line no-unused-vars
+      return error
     })
     bus.withErrorHandler(spyHandler)
     await bus.subscribe('bad').should.eventually.rejectedWith(/error case/)
@@ -180,8 +193,8 @@ describe('async error handler exists', function () {
   })
 
   it('doing nothing in special timeout should raise error', async function () {
-    let spyHandler = chai.spy(function (error, resolve, reject, name) {
-
+    let spyHandler = chai.spy(function (error, name) { // eslint-disable-line no-unused-vars, handle-callback-err
+      return delay(500)
     })
     bus.loadingTimeout = 50
     bus.errorHandlerTimeOut = 150
@@ -190,39 +203,39 @@ describe('async error handler exists', function () {
     spyHandler.should.have.been.called()
   })
 
-  it('doing nothing in special timeout when the timeout is negative should not raise error', async function () {
+  it('doing long in special timeout when the timeout is negative should not raise error', async function () {
     bus.loadingTimeout = 50
     bus.errorHandlerTimeOut = -1
-    bus.withErrorHandler(function (error, resolve, reject, name) {
-      // never do this
+    bus.withErrorHandler(function (error, name) { // eslint-disable-line no-unused-vars, handle-callback-err
+      return delay(200)
     })
     var spy = chai.spy(function () {
       return Promise.resolve()
     })
-    await Promise.race([bus.subscribe('bad'), delay(200).then(spy)])
+    await bus.subscribe({ bad: true }).then(spy)
     spy.should.have.been.called()
   })
 
   it('on error error handler should use another name and success', async function () {
-    bus.withErrorHandler(function (error, resolve, reject, name) {
+    bus.withErrorHandler(function (error, name) { // eslint-disable-line handle-callback-err
       name.should.eq('bad')
-      bus.subscribe('good').then(resolve)
+      return bus.subscribe('good')
     })
     await bus.subscribe('bad').should.eventually.eq('fine then')
   })
 
   it('on error error handler should use static existing value', async function () {
-    bus.withErrorHandler(function (error, resolve, reject, name) {
+    bus.withErrorHandler(function (error, name) { // eslint-disable-line handle-callback-err
       name.should.eq('bad')
-      resolve('perfect!')
+      return 'perfect!'
     })
     await bus.subscribe('bad').should.eventually.eq('perfect!')
   })
 
   it('on error error handler should reject with custom error', async function () {
-    bus.withErrorHandler(function (error, resolve, reject, name) {
+    bus.withErrorHandler(function (error, name) { // eslint-disable-line handle-callback-err
       name.should.eq('bad')
-      reject(new Error('oh no!'))
+      throw new Error('oh no!')
     })
     await bus.subscribe('bad').should.eventually.rejectedWith(/oh no!/)
   })
