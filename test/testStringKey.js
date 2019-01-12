@@ -149,7 +149,7 @@ describe('async factory cases', function () {
       err = e
     }
 
-    bus = new Bus(async function (name) {
+    bus = new Bus(async function () {
       await delay()
       throw err
     })
