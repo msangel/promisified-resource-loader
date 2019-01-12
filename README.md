@@ -1,5 +1,7 @@
 # promisified-resource-loader
 
+[![Coverage Status](https://coveralls.io/repos/github/msangel/promisified-resource-loader/badge.svg?branch=master)](https://coveralls.io/github/msangel/promisified-resource-loader?branch=master)
+
 TODO list:
 - [x] replace custom promise timeout with https://github.com/building5/promise-timeout#readme
 - [ ] [enable eslint](https://eslint.org/docs/user-guide/configuring)

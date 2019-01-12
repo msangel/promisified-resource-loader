@@ -6,7 +6,7 @@
   "homepage": "http://k.co.ua",
   "scripts": {
     "eslint": "eslint .",
-    "unit": "mocha --timeout 2000",
+    "unit": "nyc mocha --timeout 2000",
     "test": "npm run unit",
     "postinstall": "./install_browser_testing_env.sh",
     "flow": "flow"
@@ -27,6 +27,7 @@
     "eslint-plugin-standard": "^4.0.0",
     "mocha": "^5.2.0",
     "node": "v11.4.0",
+    "nyc": "^13.1.0",
     "timeout-as-promise": "^1.0.0"
   },
   "dependencies": {
