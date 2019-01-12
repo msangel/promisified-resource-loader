@@ -4,8 +4,8 @@
 
 TODO list:
 - [x] replace custom promise timeout with https://github.com/building5/promise-timeout#readme
-- [ ] [enable eslint](https://eslint.org/docs/user-guide/configuring)
-- [ ] error resolving strategies 
+- [x] [enable eslint](https://eslint.org/docs/user-guide/configuring)
+- [x] error resolving strategies 
   - [x] by default all errors are going to redirect to target promise error case(including timeout) `(err) => {if(err.isTimeOutError){}}`
   - [x] possibility to set global async error handler with signature `(error, resolve, reject, name)`
 - [x] test cases
@@ -26,10 +26,10 @@ TODO list:
     - [x] reject with custom error
   - [x] use string `name` together with `{ id: "someId", someDataLikeHostOEtc: "localhost", lang: "RU"}` as a key
 - [x] error handler should accept `error, name` and return promise (if it is spring - the result will be wrapped with Promise.resolve(), otherwise wrapped with Promise.reject())
+- [ ] documentation
 - [ ] node support
 - [ ] as far as using objects as a keys require external library, this possibility should be pluggable, like: `<script src="./promisified-resource-loader-support-object-keys.js"></script>`  
-- [ ] documentation
-- [ ] proper bundle with https://github.com/DefinitelyTyped/DefinitelyTyped
+- [x] proper bundle with https://github.com/DefinitelyTyped/DefinitelyTyped
 - [ ] npm publish
      
      https://github.com/sindresorhus/crypto-hash#readme
