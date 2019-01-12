@@ -24,8 +24,6 @@ if (!isBrowser) {
 
 should = chai.should()
 
-'use strict'
-
 var bus
 
 afterEach(function () {
@@ -133,7 +131,7 @@ describe('async factory for string key', function () {
   it('underlying error(like transport error 404 and 501) must be in usual promise flow, error details must be delivered as is', async function () {
     var err
     try {
-      a.b.c
+      a.b.c // eslint-disable-line
     } catch (e) {
       err = e
     }
