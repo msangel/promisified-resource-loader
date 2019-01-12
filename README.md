@@ -1,5 +1,5 @@
 # promisified-resource-loader
-
+[![Build Status](https://travis-ci.org/msangel/promisified-resource-loader.svg?branch=master)](https://travis-ci.org/msangel/promisified-resource-loader)
 [![Coverage Status](https://coveralls.io/repos/github/msangel/promisified-resource-loader/badge.svg?branch=master)](https://coveralls.io/github/msangel/promisified-resource-loader?branch=master)
 
 TODO list:
