@@ -6,8 +6,7 @@
   "homepage": "http://k.co.ua",
   "scripts": {
     "eslint": "eslint .",
-    "unit": "nyc mocha --timeout 2000",
-    "test": "npm run unit",
+    "test" :"nyc mocha --timeout 2000 && nyc report --reporter=text-lcov | coveralls",
     "postinstall": "./install_browser_testing_env.sh",
     "flow": "flow"
   },
@@ -18,6 +17,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-spies": "^1.0.0",
+    "coveralls": "^3.0.2",
     "eslint": "^5.12.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-chai-friendly": "^0.4.1",
@@ -26,6 +26,7 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-standard": "^4.0.0",
     "mocha": "^5.2.0",
+    "mocha-lcov-reporter": "^1.3.0",
     "node": "v11.4.0",
     "nyc": "^13.1.0",
     "timeout-as-promise": "^1.0.0"
