@@ -39,15 +39,3 @@ TODO list:
 - [ ] features: replace eval with safer version (options here: 1) sandboxed eval; 2) template function like mustache.js) 
      
      https://github.com/sindresorhus/crypto-hash#readme
-     
-     writing github documentation tutorial
-     writing github documentation best practice
-     
-     
-     structure:
-- [ ] Demo
-- [ ] Description
-
-
-  
-  
