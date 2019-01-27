@@ -21,7 +21,7 @@ alert('sdsdsd')
 - [ ] node support
 - [ ] better documentation
   - [ ] sample with api
-  - [ ] npm publish (1.0 release)
+- [ ] npm publish (1.0 release)
 - [ ] eviction strategies: fixed pool(lru) and time-based eviction (peek one of):
   - [ ] https://github.com/rstuven/node-cachai
   - [ ] https://www.npmjs.com/search?q=LRU
