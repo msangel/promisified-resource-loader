@@ -9,4 +9,5 @@ export interface Bus {
     loadingTimeout: number
     errorHandlerTimeOut: number
     withErrorHandler: (fun: (error: Error, name: string| object )=>undefined) => Bus
+    getAsString: (val: any) => string
 }

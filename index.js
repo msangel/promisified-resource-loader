@@ -10,15 +10,41 @@
  */
 /* eslint consistent-this: ["error", "me"] */
 (function () {
-  var pt, sha1
-  var isBrowser = this.window === this
-  if (isBrowser) {
-    pt = window.promiseTimeout
-    sha1 = window.jsonHash.digest
-  } else {
-    pt = require('promise-timeout')
-    sha1 = require('json-hash').digest
-  }
+  var helpers = {}
+  Object.defineProperties(helpers, (function () {
+    var isBrowser = this.window === this
+    var sha1, pt, codependency, requirePeer
+    if (!isBrowser) {
+      codependency = require('codependency')
+      requirePeer = codependency.register(module)
+    }
+    return {
+      'sha1': {
+        get: function () {
+          if (!sha1) {
+            if (isBrowser) {
+              sha1 = window.jsonHash.digest
+            } else {
+              sha1 = requirePeer('json-hash').digest
+            }
+          }
+          return sha1
+        }
+      },
+      'pt': {
+        get: function () {
+          if (!pt) {
+            if (isBrowser) {
+              pt = window.promiseTimeout
+            } else {
+              pt = require('promise-timeout')
+            }
+          }
+          return pt
+        }
+      }
+    }
+  })())
 
   function isPromise (obj) {
     return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function'
@@ -26,14 +52,6 @@
 
   function isString (myVar) {
     return (typeof myVar === 'string' || myVar instanceof String)
-  }
-
-  function getAsString (val) {
-    if (isString(val)) {
-      return val
-    } else {
-      return sha1(val)
-    }
   }
 
   var Bus = function (factory) {
@@ -49,12 +67,19 @@
     var errorHandler = function (error, name) {
       return error
     }
+    me.getAsString = function (val) {
+      if (isString(val)) {
+        return val
+      } else {
+        helpers.sha1(val)
+      }
+    }
     var ev = {}
     var cache = {}
     me.subscribe = function (name) {
       console.log('subscribe on: ', name)
 
-      var key = getAsString(name)
+      var key = me.getAsString(name)
 
       console.log('cache[name]: ', cache[key])
       if (cache[key]) {
@@ -84,7 +109,7 @@
     }
 
     var publishSuccess = function (name, template) {
-      var key = getAsString(name)
+      var key = me.getAsString(name)
       ev[key] = ev[key] || []
       for (let i = 0; i < ev[key].length; i++) {
         ev[key][i](template)
@@ -93,7 +118,7 @@
     }
 
     var publishError = function (name, error) {
-      var key = getAsString(name)
+      var key = me.getAsString(name)
       ev[key] = ev[key] || []
       for (let i = 0; i < ev[key].length; i++) {
         ev[key][i](false, error)
@@ -111,7 +136,7 @@
         factoryResult = Promise.reject(e)
       }
 
-      pt.timeout(factoryResult, me.loadingTimeout)
+      helpers.pt.timeout(factoryResult, me.loadingTimeout)
         .then(function (template) {
           publishSuccess(name, template)
         }).catch(function (err) {
@@ -127,7 +152,7 @@
           })
 
           if (me.errorHandlerTimeOut >= 0) {
-            promise = pt.timeout(promise, me.errorHandlerTimeOut)
+            promise = helpers.pt.timeout(promise, me.errorHandlerTimeOut)
           }
 
           return promise.then(function (template) {
