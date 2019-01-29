@@ -71,7 +71,7 @@
       if (isString(val)) {
         return val
       } else {
-        helpers.sha1(val)
+        return helpers.sha1(val)
       }
     }
     var ev = {}
@@ -81,7 +81,7 @@
 
       var key = me.getAsString(name)
 
-      console.log('cache[name]: ', cache[key])
+      console.log('cache[' + key + ']: ', cache[key])
       if (cache[key]) {
         return Promise.resolve(cache[key])
       } else {

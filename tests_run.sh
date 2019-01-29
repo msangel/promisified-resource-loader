@@ -10,11 +10,14 @@ fi
 
 cd ${dir}
 
-cd cd test/no_peers/
+cp index.js test/no_peers/index.js
+cd test/no_peers/
 npm test
 verify
 
 cd ${dir}
+
+cp index.js test/with_sha_peer/index.js
 cd test/with_sha_peer/
 npm test
 verify
