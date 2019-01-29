@@ -62,3 +62,5 @@ typings/
 
 .idea
 package-lock.json
+test/*/package.json
+test/*/index.js

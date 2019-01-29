@@ -6,9 +6,10 @@
   "homepage": "http://k.co.ua",
   "scripts": {
     "eslint": "eslint .",
-    "test": "nyc mocha --timeout 2000 && nyc report --reporter=text-lcov | coveralls",
-    "postinstall": "./install_browser_testing_env.sh",
-    "flow": "flow"
+    "test": "./tests_run.sh",
+    "postinstall": "./tests_prepare.sh",
+    "flow": "flow",
+    "coveralls": "npm test && nyc report --reporter=text-lcov | coveralls"
   },
   "author": "",
   "license": "ISC",

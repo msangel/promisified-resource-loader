@@ -212,7 +212,7 @@ describe('async error handler exists', function () {
     var spy = chai.spy(function () {
       return Promise.resolve()
     })
-    await bus.subscribe({ bad: true }).then(spy)
+    await bus.subscribe('bad').then(spy)
     spy.should.have.been.called()
   })
 
