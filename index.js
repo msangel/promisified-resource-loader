@@ -23,7 +23,11 @@
         get: function () {
           if (!sha1) {
             if (isBrowser) {
-              sha1 = window.jsonHash.digest
+              if (window.jsonHash.digest) {
+                sha1 = window.jsonHash.digest
+              } else {
+                throw new Error('')
+              }
             } else {
               sha1 = requirePeer('json-hash').digest
             }

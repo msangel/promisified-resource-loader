@@ -17,7 +17,11 @@ alert('sdsdsd')
 ## Maintenance
 ### Features to add
 - [ ] as far as using objects as a keys require external library, this possibility should be pluggable, like: `<script src="./promisified-resource-loader-support-object-keys.js"></script>`
-	- [ ] https://github.com/sindresorhus/crypto-hash#readme
+	- [x] https://github.com/sindresorhus/crypto-hash#readme
+	- [ ] codependency for browser analog (simply check names in `window` and on error throw normal message)
+	- [ ] create pluggable extensions scripts for browser ( like `promisified-resource-loader-support-object-keys`)
+	- [ ] in browser tests via frames (why not?) 
+	  - [ ] also this https://stackoverflow.com/questions/30965909/how-to-remove-change-some-require-calls-when-using-browserify (browserify remove dependency)
 - [ ] node support
 - [ ] better documentation
   - [ ] sample with api
@@ -25,9 +29,6 @@ alert('sdsdsd')
 - [ ] eviction strategies: fixed pool(lru) and time-based eviction (peek one of):
   - [ ] https://github.com/rstuven/node-cachai
   - [ ] https://www.npmjs.com/search?q=LRU
-- [ ] replace eval with safer version, options here:
-	- [ ] sandboxed eval
-	- [ ] template function like mustache.js
 ### Existed test coverage scenarios
 - [x] sync loading OK
 - [x] sync loading error
